@@ -1,6 +1,20 @@
 # app-store-connect-api
 
-A modular TypeScript client for the App Store Connect API built with Clean Architecture boundaries and MVVM-style feature composition.
+Use this project to authenticate with App Store Connect and list your apps from the terminal with minimal setup.
+It handles JWT generation (ES256), authenticated API requests, and clean CLI output.
+
+## What You Can Do
+
+Current:
+- Authenticate with App Store Connect using JWT credentials.
+- List all apps in your account from CLI.
+- Reuse the TypeScript modules in your own automation scripts.
+
+Planned:
+- Upload IPA builds.
+- Upload and manage screenshots per locale/device.
+- Manage app metadata (name, subtitle, description, keywords).
+- Manage versions, phased release steps, and submission flows.
 
 ## Requirements
 
@@ -13,26 +27,50 @@ A modular TypeScript client for the App Store Connect API built with Clean Archi
 pnpm install
 ```
 
-## Verify
+## Quick Start
 
 ```bash
 pnpm verify
-```
-
-`verify` runs typecheck, tests, build, and a CLI runtime check (`--help`).
-
-## CLI
-
-```bash
 pnpm build
 pnpm cli -- --help
 ```
 
-Development without build:
+Using `npx` (published package):
 
 ```bash
-npx tsx src/cli/main.ts --help
+npx app-store-connect-api --help
 ```
+
+## List Apps
+
+```bash
+ASC_ISSUER_ID="<issuer-id>" \
+ASC_KEY_ID="<key-id>" \
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
+pnpm cli
+```
+
+With `npx`:
+
+```bash
+ASC_ISSUER_ID="<issuer-id>" \
+ASC_KEY_ID="<key-id>" \
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
+npx app-store-connect-api
+```
+
+Fast dev run (no build):
+
+```bash
+ASC_ISSUER_ID="<issuer-id>" \
+ASC_KEY_ID="<key-id>" \
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
+npx tsx src/cli/main.ts
+```
+
+Notes:
+- `ASC_PRIVATE_KEY` supports escaped newlines (`\\n`).
+- `ASC_BASE_URL` is optional and defaults to production App Store Connect API.
 
 ## Scripts
 
@@ -43,14 +81,10 @@ npx tsx src/cli/main.ts --help
 - `pnpm cli:dev -- --help`
 - `pnpm verify`
 
-## Project Layout
+## Internal Modules
 
-- `src/core`: shared primitives and error contracts.
-- `src/domain`: entities, repository contracts, and use cases.
-- `src/data`: auth, transport, endpoint contracts, and repository implementations.
-- `src/features`: MVVM-style feature state and view model orchestration.
-- `src/cli`: executable composition entrypoint.
-
-## Docs
-
-- `/Users/ale/Dev/app-store-connect-api/docs/usage/cli.md`
+- `src/core`: shared primitives and errors.
+- `src/domain`: entities and use cases.
+- `src/data`: auth, transport, and API repository.
+- `src/features`: apps view-model orchestration.
+- `src/cli`: executable entrypoint.
