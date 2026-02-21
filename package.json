@@ -1,0 +1,26 @@
+{
+  "name": "app-store-connect-api",
+  "version": "1.0.0",
+  "description": "Modular TypeScript App Store Connect API client with Clean Architecture + MVVM feature composition.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test:watch": "vitest",
+    "verify": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [],
+  "author": "Alejandro Sanabria <alesanabriav@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
