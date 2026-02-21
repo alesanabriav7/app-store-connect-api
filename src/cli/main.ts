@@ -22,8 +22,9 @@ function printHelp(): void {
   console.log(`app-store-connect-api CLI
 
 Usage:
-  npm run cli -- --help
-  npm run cli
+  pnpm cli -- --help
+  pnpm cli
+  npx tsx src/cli/main.ts --help
 
 Required environment variables:
   ASC_ISSUER_ID

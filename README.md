@@ -2,17 +2,48 @@
 
 A modular TypeScript client for the App Store Connect API built with Clean Architecture boundaries and MVVM-style feature composition.
 
-## TypeScript Validation
+## Requirements
 
-This repository is fully TypeScript-first and validated via:
+- Node.js 20+
+- pnpm 10+
+
+## Install
 
 ```bash
-npm run verify
+pnpm install
 ```
 
-`verify` runs typecheck, unit tests, build, and a CLI runtime check (`--help`).
+## Verify
 
-## Architecture
+```bash
+pnpm verify
+```
+
+`verify` runs typecheck, tests, build, and a CLI runtime check (`--help`).
+
+## CLI
+
+```bash
+pnpm build
+pnpm cli -- --help
+```
+
+Development without build:
+
+```bash
+npx tsx src/cli/main.ts --help
+```
+
+## Scripts
+
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
+- `pnpm cli -- --help`
+- `pnpm cli:dev -- --help`
+- `pnpm verify`
+
+## Project Layout
 
 - `src/core`: shared primitives and error contracts.
 - `src/domain`: entities, repository contracts, and use cases.
@@ -20,22 +51,6 @@ npm run verify
 - `src/features`: MVVM-style feature state and view model orchestration.
 - `src/cli`: executable composition entrypoint.
 
-## Scripts
+## Docs
 
-- `npm run typecheck`
-- `npm run test`
-- `npm run build`
-- `npm run cli -- --help`
-- `npm run verify`
-
-## Milestones
-
-- `docs/milestones/01-foundation.md`
-- `docs/milestones/02-auth.md`
-- `docs/milestones/03-networking.md`
-- `docs/milestones/04-feature-mvvm.md`
-- `docs/milestones/05-cli-and-verification.md`
-
-## CLI Example
-
-See `docs/usage/cli.md` for environment variables and execution examples.
+- `/Users/ale/Dev/app-store-connect-api/docs/usage/cli.md`
