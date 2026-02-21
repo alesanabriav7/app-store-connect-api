@@ -8,7 +8,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test:watch": "vitest",
-    "verify": "npm run typecheck && npm run test && npm run build"
+    "verify": "npm run typecheck && npm run test && npm run build && npm run cli -- --help",
+    "cli": "node dist/cli/main.js"
   },
   "keywords": [],
   "author": "Alejandro Sanabria <alesanabriav@gmail.com>",
@@ -22,5 +23,8 @@
     "@types/node": "^25.3.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "bin": {
+    "app-store-connect-api": "dist/cli/main.js"
   }
 }
