@@ -7,3 +7,8 @@ export * from "./domain/services/app-store-connect-token-provider.js";
 export * from "./domain/use-cases/fetch-apps-use-case.js";
 export * from "./features/apps/apps-list-view-model.js";
 export * from "./data/auth/app-store-connect-jwt-token-provider.js";
+export * from "./data/apps/apps-api-contract.js";
+export * from "./data/apps/apps-api-repository.js";
+export * from "./data/apps/apps-endpoints.js";
+export * from "./data/http/http-client.js";
+export * from "./data/http/fetch-http-client.js";
