@@ -1,19 +1,11 @@
 import { FetchAppsUseCase } from "../../domain/use-cases/fetch-apps-use-case.js";
-import type { AppSummary } from "../../domain/entities/app.js";
+import { initialAppsListViewState, type AppsListViewState } from "./apps-list-view-state.js";
 
-export interface AppsListViewState {
-  readonly status: "idle" | "loading" | "loaded" | "error";
-  readonly apps: readonly AppSummary[];
-  readonly errorMessage?: string;
-}
-
-const INITIAL_STATE: AppsListViewState = {
-  status: "idle",
-  apps: []
-};
+export type AppsListListener = (state: AppsListViewState) => void;
 
 export class AppsListViewModel {
-  private state: AppsListViewState = INITIAL_STATE;
+  private state: AppsListViewState = initialAppsListViewState;
+  private readonly listeners = new Set<AppsListListener>();
 
   public constructor(private readonly fetchAppsUseCase: FetchAppsUseCase) {}
 
@@ -21,20 +13,56 @@ export class AppsListViewModel {
     return this.state;
   }
 
-  public async loadApps(): Promise<AppsListViewState> {
-    this.state = { status: "loading", apps: [] };
+  public subscribe(listener: AppsListListener): () => void {
+    this.listeners.add(listener);
+    listener(this.state);
+
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  public async refresh(): Promise<void> {
+    if (this.state.status === "loading") {
+      return;
+    }
+
+    this.setState({
+      status: "loading",
+      apps: this.state.apps,
+      errorMessage: null
+    });
 
     try {
       const apps = await this.fetchAppsUseCase.execute();
-      this.state = { status: "loaded", apps };
-      return this.state;
+      const sortedApps = [...apps].sort((left, right) =>
+        left.name.localeCompare(right.name)
+      );
+
+      this.setState({
+        status: "loaded",
+        apps: sortedApps,
+        errorMessage: null
+      });
     } catch (error) {
-      this.state = {
+      this.setState({
         status: "error",
-        apps: [],
+        apps: this.state.apps,
         errorMessage: error instanceof Error ? error.message : "Unknown error"
-      };
-      return this.state;
+      });
+    }
+  }
+
+  public async loadApps(): Promise<AppsListViewState> {
+    await this.refresh();
+    return this.state;
+  }
+
+  private setState(nextState: AppsListViewState): void {
+    this.state = nextState;
+
+    for (const listener of this.listeners) {
+      listener(this.state);
     }
   }
 }
