@@ -8,10 +8,11 @@ It handles JWT generation (ES256), authenticated API requests, and clean CLI out
 Current:
 - Authenticate with App Store Connect using JWT credentials.
 - List all apps in your account from CLI.
+- Generate IPA artifacts from local projects (`xcodebuild` or custom command).
+- Upload IPA builds with strict local preflight verification.
 - Reuse the TypeScript modules in your own automation scripts.
 
 Planned:
-- Upload IPA builds.
 - Upload and manage screenshots per locale/device.
 - Manage app metadata (name, subtitle, description, keywords).
 - Manage versions, phased release steps, and submission flows.
@@ -71,6 +72,84 @@ npx tsx src/cli/main.ts
 Notes:
 - `ASC_PRIVATE_KEY` supports escaped newlines (`\\n`).
 - `ASC_BASE_URL` is optional and defaults to production App Store Connect API.
+
+## Generate IPA Locally
+
+`ipa generate` does not require App Store Connect credentials.
+
+Generate via `xcodebuild`:
+
+```bash
+pnpm cli -- ipa generate \
+  --output-ipa ./dist/MyApp.ipa \
+  --scheme MyApp \
+  --workspace-path ./MyApp.xcworkspace \
+  --export-options-plist ./ExportOptions.plist
+```
+
+Generate via custom command:
+
+```bash
+pnpm cli -- ipa generate \
+  --output-ipa ./dist/MyApp.ipa \
+  --build-command "make build-ipa" \
+  --generated-ipa-path ./build/MyApp.ipa
+```
+
+## Upload IPA Build
+
+`builds upload` always performs strict local preflight verification first:
+- file readability and `.ipa` extension
+- archive structure (`Payload/*.app/Info.plist`)
+- bundle id / version / build number checks
+- code signing checks (`codesign --verify --strict --deep` and `codesign -dv`)
+- local SHA-256 and MD5 checksums
+
+By default, upload runs in dry-run mode. Add `--apply` to execute mutations.
+
+Upload prebuilt IPA:
+
+```bash
+ASC_ISSUER_ID="<issuer-id>" \
+ASC_KEY_ID="<key-id>" \
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
+pnpm cli -- builds upload \
+  --app com.example.myapp \
+  --version 1.2.3 \
+  --build-number 45 \
+  --ipa ./dist/MyApp.ipa
+```
+
+Upload and apply changes:
+
+```bash
+ASC_ISSUER_ID="<issuer-id>" \
+ASC_KEY_ID="<key-id>" \
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
+pnpm cli -- builds upload \
+  --app com.example.myapp \
+  --version 1.2.3 \
+  --build-number 45 \
+  --ipa ./dist/MyApp.ipa \
+  --apply \
+  --wait-processing
+```
+
+Upload with inline generation (`xcodebuild` mode):
+
+```bash
+ASC_ISSUER_ID="<issuer-id>" \
+ASC_KEY_ID="<key-id>" \
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
+pnpm cli -- builds upload \
+  --app com.example.myapp \
+  --version 1.2.3 \
+  --build-number 45 \
+  --scheme MyApp \
+  --workspace-path ./MyApp.xcworkspace \
+  --export-options-plist ./ExportOptions.plist \
+  --apply
+```
 
 ## Scripts
 
