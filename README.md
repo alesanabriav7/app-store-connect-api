@@ -2,20 +2,54 @@
 
 TypeScript CLI and library for App Store Connect. Authenticate with JWT, list apps, generate IPAs, and upload builds — all from your terminal.
 
+## Installation
+
+### From npm
+
+```bash
+npx app-store-connect-api --help
+```
+
+Or install globally:
+
+```bash
+npm install -g app-store-connect-api
+app-store-connect-api --help
+```
+
+### From source
+
+```bash
+git clone https://github.com/alesanabriav7/app-store-connect-api.git
+cd app-store-connect-api
+pnpm install && pnpm build
+pnpm cli -- --help
+```
+
 ## Setup
 
 Requires Node.js 20+ and an [App Store Connect API key](https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api).
 
-Create a `.env` file (or set these in your shell/CI):
+Set these environment variables (via `.env`, shell, or CI secrets):
 
 ```env
 ASC_ISSUER_ID=your-issuer-id
 ASC_KEY_ID=your-key-id
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
-# ASC_BASE_URL=https://api.appstoreconnect.apple.com/  (optional)
 ```
 
-`ASC_PRIVATE_KEY` supports escaped newlines (`\n`).
+For the private key, point to your `.p8` file (recommended):
+
+```env
+ASC_PRIVATE_KEY_PATH=./AuthKey_XXXXXX.p8
+```
+
+Or pass the key inline:
+
+```env
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+```
+
+`ASC_PRIVATE_KEY_PATH` takes priority when both are set. `ASC_BASE_URL` is optional and defaults to `https://api.appstoreconnect.apple.com/`.
 
 ## Usage
 
