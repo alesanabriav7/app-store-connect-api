@@ -1,145 +1,86 @@
 # app-store-connect-api
 
-Use this project to authenticate with App Store Connect and list your apps from the terminal with minimal setup.
-It handles JWT generation (ES256), authenticated API requests, and clean CLI output.
+TypeScript CLI and library for App Store Connect. Authenticate with JWT, list apps, generate IPAs, and upload builds — all from your terminal.
 
-## What You Can Do
+## Setup
 
-Current:
-- Authenticate with App Store Connect using JWT credentials.
-- List all apps in your account from CLI.
-- Generate IPA artifacts from local projects (`xcodebuild` or custom command).
-- Upload IPA builds with strict local preflight verification.
-- Upload and manage screenshots per locale/device via reusable data/domain modules.
-- Manage localized app metadata (`name`, `subtitle`, `description`, `keywords`) via reusable modules.
-- Manage app versions, phased release state transitions, and submission flows via reusable modules.
-- Reuse the TypeScript modules in your own automation scripts.
+Requires Node.js 20+ and an [App Store Connect API key](https://developer.apple.com/documentation/appstoreconnectapi/creating_api_keys_for_app_store_connect_api).
 
-## Requirements
+Create a `.env` file (or set these in your shell/CI):
 
-- Node.js 20+
-- pnpm 10+
-
-## Install
-
-```bash
-pnpm install
+```env
+ASC_ISSUER_ID=your-issuer-id
+ASC_KEY_ID=your-key-id
+ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
+# ASC_BASE_URL=https://api.appstoreconnect.apple.com/  (optional)
 ```
 
-## Quick Start
+`ASC_PRIVATE_KEY` supports escaped newlines (`\n`).
+
+## Usage
+
+### List apps
 
 ```bash
-pnpm verify
-pnpm build
-pnpm cli -- --help
+npx app-store-connect-api apps list
 ```
 
-Using `npx` (published package):
+JSON output:
 
 ```bash
-npx app-store-connect-api --help
+npx app-store-connect-api apps list --json
 ```
 
-## List Apps
+### Generate IPA
+
+No credentials required.
+
+From xcodebuild:
 
 ```bash
-ASC_ISSUER_ID="<issuer-id>" \
-ASC_KEY_ID="<key-id>" \
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
-pnpm cli
-```
-
-With `npx`:
-
-```bash
-ASC_ISSUER_ID="<issuer-id>" \
-ASC_KEY_ID="<key-id>" \
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
-npx app-store-connect-api
-```
-
-Fast dev run (no build):
-
-```bash
-ASC_ISSUER_ID="<issuer-id>" \
-ASC_KEY_ID="<key-id>" \
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
-npx tsx src/cli/main.ts
-```
-
-Notes:
-- `ASC_PRIVATE_KEY` supports escaped newlines (`\\n`).
-- `ASC_BASE_URL` is optional and defaults to production App Store Connect API.
-
-## Generate IPA Locally
-
-`ipa generate` does not require App Store Connect credentials.
-
-Generate via `xcodebuild`:
-
-```bash
-pnpm cli -- ipa generate \
+npx app-store-connect-api ipa generate \
   --output-ipa ./dist/MyApp.ipa \
   --scheme MyApp \
   --workspace-path ./MyApp.xcworkspace \
   --export-options-plist ./ExportOptions.plist
 ```
 
-Generate via custom command:
+From a custom command:
 
 ```bash
-pnpm cli -- ipa generate \
+npx app-store-connect-api ipa generate \
   --output-ipa ./dist/MyApp.ipa \
   --build-command "make build-ipa" \
   --generated-ipa-path ./build/MyApp.ipa
 ```
 
-## Upload IPA Build
+### Upload build
 
-`builds upload` always performs strict local preflight verification first:
-- file readability and `.ipa` extension
-- archive structure (`Payload/*.app/Info.plist`)
-- bundle id / version / build number checks
-- code signing checks (`codesign --verify --strict --deep` and `codesign -dv`)
-- local SHA-256 and MD5 checksums
-
-By default, upload runs in dry-run mode. Add `--apply` to execute mutations.
-
-Upload prebuilt IPA:
+Dry-run by default — verifies the IPA locally without uploading:
 
 ```bash
-ASC_ISSUER_ID="<issuer-id>" \
-ASC_KEY_ID="<key-id>" \
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
-pnpm cli -- builds upload \
+npx app-store-connect-api builds upload \
   --app com.example.myapp \
   --version 1.2.3 \
   --build-number 45 \
   --ipa ./dist/MyApp.ipa
 ```
 
-Upload and apply changes:
+Add `--apply` to upload, `--wait-processing` to poll until done:
 
 ```bash
-ASC_ISSUER_ID="<issuer-id>" \
-ASC_KEY_ID="<key-id>" \
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
-pnpm cli -- builds upload \
+npx app-store-connect-api builds upload \
   --app com.example.myapp \
   --version 1.2.3 \
   --build-number 45 \
   --ipa ./dist/MyApp.ipa \
-  --apply \
-  --wait-processing
+  --apply --wait-processing
 ```
 
-Upload with inline generation (`xcodebuild` mode):
+Build and upload in one step (xcodebuild mode):
 
 ```bash
-ASC_ISSUER_ID="<issuer-id>" \
-ASC_KEY_ID="<key-id>" \
-ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----" \
-pnpm cli -- builds upload \
+npx app-store-connect-api builds upload \
   --app com.example.myapp \
   --version 1.2.3 \
   --build-number 45 \
@@ -149,19 +90,68 @@ pnpm cli -- builds upload \
   --apply
 ```
 
-## Scripts
+#### Preflight checks
 
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm build`
-- `pnpm cli -- --help`
-- `pnpm cli:dev -- --help`
-- `pnpm verify`
+Every upload runs these checks before touching App Store Connect:
 
-## Internal Modules
+- File exists, is readable, has `.ipa` extension
+- Archive contains `Payload/*.app/Info.plist`
+- Bundle ID, version, and build number match expectations
+- Code signing is valid (`codesign --verify --strict --deep`)
+- SHA-256 and MD5 checksums computed
 
-- `src/core`: shared primitives and errors.
-- `src/domain`: entities and use cases.
-- `src/data`: auth, transport, and API repository.
-- `src/features`: apps view-model orchestration.
-- `src/cli`: executable entrypoint.
+### Help
+
+```bash
+npx app-store-connect-api --help
+```
+
+## Library usage
+
+```typescript
+import { AppStoreConnectClient, listApps } from "app-store-connect-api";
+
+const client = new AppStoreConnectClient({
+  issuerId: process.env.ASC_ISSUER_ID!,
+  keyId: process.env.ASC_KEY_ID!,
+  privateKey: process.env.ASC_PRIVATE_KEY!
+});
+
+const apps = await listApps(client);
+console.log(apps);
+```
+
+## Development
+
+```bash
+pnpm install
+pnpm verify          # typecheck + test + build + help
+```
+
+Individual commands:
+
+```bash
+pnpm typecheck       # type check
+pnpm test            # run tests
+pnpm build           # compile to dist/
+pnpm cli -- --help   # run built CLI
+pnpm cli:dev -- --help  # run from source (no build needed)
+```
+
+## Project structure
+
+```
+src/
+  api/
+    client.ts        # HTTP client with JWT auth
+    types.ts         # Shared upload operation types
+  commands/
+    apps-list.ts     # apps list command
+    builds-upload.ts # builds upload command
+    ipa-generate.ts  # ipa generate command
+  ipa/
+    artifact.ts      # IPA resolution (prebuilt/xcodebuild/custom)
+    preflight.ts     # IPA verification
+  cli.ts             # CLI entry point
+  index.ts           # Public API exports
+```
