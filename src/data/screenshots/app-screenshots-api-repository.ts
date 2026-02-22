@@ -57,13 +57,15 @@ export class AppScreenshotsApiRepository implements AppScreenshotsRepository {
           );
         }
 
-        return (
-          screenshotsById.get(screenshotId) ?? {
-            id: screenshotId,
-            fileName: null,
-            assetDeliveryState: null
-          }
-        );
+        const screenshot = screenshotsById.get(screenshotId);
+
+        if (!screenshot) {
+          throw new InfrastructureError(
+            `Malformed screenshot set payload: screenshot "${screenshotId}" was referenced but not included.`
+          );
+        }
+
+        return screenshot;
       });
 
       return {

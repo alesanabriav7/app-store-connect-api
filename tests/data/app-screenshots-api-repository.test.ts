@@ -157,6 +157,38 @@ describe("AppScreenshotsApiRepository", () => {
     });
   });
 
+  it("fails when a related screenshot is missing from included resources", async () => {
+    const httpClient: HttpClient = {
+      request: async <T>() =>
+        ({
+          status: 200,
+          headers: new Headers(),
+          data: {
+            data: [
+              {
+                id: "set-1",
+                attributes: {
+                  screenshotDisplayType: "APP_IPHONE_67"
+                },
+                relationships: {
+                  appScreenshots: {
+                    data: [{ id: "shot-missing" }]
+                  }
+                }
+              }
+            ],
+            included: []
+          }
+        }) as HttpResponse<T>
+    };
+
+    const repository = new AppScreenshotsApiRepository(httpClient);
+
+    await expect(repository.listScreenshotSets("loc-1")).rejects.toThrow(
+      'Malformed screenshot set payload: screenshot "shot-missing" was referenced but not included.'
+    );
+  });
+
   it("marks screenshot uploaded and deletes it", async () => {
     const requests: HttpRequest[] = [];
 

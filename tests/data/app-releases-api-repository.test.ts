@@ -105,70 +105,91 @@ describe("AppReleasesApiRepository", () => {
 
   it("updates release state, submits for review, and manages phased release", async () => {
     const requests: HttpRequest[] = [];
-    const responses: readonly HttpResponse<unknown>[] = [
-      {
-        status: 200,
-        headers: new Headers(),
-        data: {
-          data: {
-            id: "version-1",
-            attributes: {
-              versionString: "1.2.3",
-              platform: "IOS",
-              appStoreState: "WAITING_FOR_REVIEW",
-              releaseType: "SCHEDULED",
-              earliestReleaseDate: "2026-03-01"
-            }
-          }
-        }
-      },
-      {
-        status: 201,
-        headers: new Headers(),
-        data: {
-          data: {
-            id: "submission-1"
-          }
-        }
-      },
-      {
-        status: 201,
-        headers: new Headers(),
-        data: {
-          data: {
-            id: "phased-1",
-            attributes: {
-              phasedReleaseState: "ACTIVE",
-              currentDayNumber: 1,
-              startDate: "2026-03-02"
-            }
-          }
-        }
-      },
-      {
-        status: 200,
-        headers: new Headers(),
-        data: {
-          data: {
-            id: "phased-1",
-            attributes: {
-              phasedReleaseState: "PAUSED",
-              currentDayNumber: 3,
-              startDate: "2026-03-02"
-            }
-          }
-        }
-      }
-    ];
-
-    let responseIndex = 0;
 
     const httpClient: HttpClient = {
       request: async <T>(request: HttpRequest) => {
         requests.push(request);
-        const response = responses[responseIndex] as HttpResponse<T>;
-        responseIndex += 1;
-        return response;
+
+        if (
+          request.method === "PATCH" &&
+          request.path === "/v1/appStoreVersions/version-1"
+        ) {
+          return {
+            status: 200,
+            headers: new Headers(),
+            data: {
+              data: {
+                id: "version-1",
+                attributes: {
+                  versionString: "1.2.3",
+                  platform: "IOS",
+                  appStoreState: "WAITING_FOR_REVIEW",
+                  releaseType: "SCHEDULED",
+                  earliestReleaseDate: "2026-03-01"
+                }
+              }
+            }
+          } as HttpResponse<T>;
+        }
+
+        if (
+          request.method === "POST" &&
+          request.path === "/v1/appStoreVersionSubmissions"
+        ) {
+          return {
+            status: 201,
+            headers: new Headers(),
+            data: {
+              data: {
+                id: "submission-1"
+              }
+            }
+          } as HttpResponse<T>;
+        }
+
+        if (
+          request.method === "POST" &&
+          request.path === "/v1/appStoreVersionPhasedReleases"
+        ) {
+          return {
+            status: 201,
+            headers: new Headers(),
+            data: {
+              data: {
+                id: "phased-1",
+                attributes: {
+                  phasedReleaseState: "ACTIVE",
+                  currentDayNumber: 1,
+                  startDate: "2026-03-02"
+                }
+              }
+            }
+          } as HttpResponse<T>;
+        }
+
+        if (
+          request.method === "PATCH" &&
+          request.path === "/v1/appStoreVersionPhasedReleases/phased-1"
+        ) {
+          return {
+            status: 200,
+            headers: new Headers(),
+            data: {
+              data: {
+                id: "phased-1",
+                attributes: {
+                  phasedReleaseState: "PAUSED",
+                  currentDayNumber: 3,
+                  startDate: "2026-03-02"
+                }
+              }
+            }
+          } as HttpResponse<T>;
+        }
+
+        throw new Error(
+          `Unexpected request in test: ${request.method} ${request.path}`
+        );
       }
     };
 
@@ -213,9 +234,14 @@ describe("AppReleasesApiRepository", () => {
       startDate: "2026-03-02"
     });
 
-    expect(requests[0]?.path).toBe("/v1/appStoreVersions/version-1");
-    expect(requests[0]?.method).toBe("PATCH");
-    expect(requests[0]?.body).toEqual({
+    expect(requests).toHaveLength(4);
+
+    const updateVersionRequest = requests.find(
+      (request) =>
+        request.method === "PATCH" &&
+        request.path === "/v1/appStoreVersions/version-1"
+    );
+    expect(updateVersionRequest?.body).toEqual({
       data: {
         type: "appStoreVersions",
         id: "version-1",
@@ -226,9 +252,12 @@ describe("AppReleasesApiRepository", () => {
       }
     });
 
-    expect(requests[1]?.path).toBe("/v1/appStoreVersionSubmissions");
-    expect(requests[1]?.method).toBe("POST");
-    expect(requests[1]?.body).toEqual({
+    const submissionRequest = requests.find(
+      (request) =>
+        request.method === "POST" &&
+        request.path === "/v1/appStoreVersionSubmissions"
+    );
+    expect(submissionRequest?.body).toEqual({
       data: {
         type: "appStoreVersionSubmissions",
         relationships: {
@@ -242,9 +271,12 @@ describe("AppReleasesApiRepository", () => {
       }
     });
 
-    expect(requests[2]?.path).toBe("/v1/appStoreVersionPhasedReleases");
-    expect(requests[2]?.method).toBe("POST");
-    expect(requests[2]?.body).toEqual({
+    const createPhasedReleaseRequest = requests.find(
+      (request) =>
+        request.method === "POST" &&
+        request.path === "/v1/appStoreVersionPhasedReleases"
+    );
+    expect(createPhasedReleaseRequest?.body).toEqual({
       data: {
         type: "appStoreVersionPhasedReleases",
         attributes: {
@@ -261,9 +293,12 @@ describe("AppReleasesApiRepository", () => {
       }
     });
 
-    expect(requests[3]?.path).toBe("/v1/appStoreVersionPhasedReleases/phased-1");
-    expect(requests[3]?.method).toBe("PATCH");
-    expect(requests[3]?.body).toEqual({
+    const updatePhasedReleaseRequest = requests.find(
+      (request) =>
+        request.method === "PATCH" &&
+        request.path === "/v1/appStoreVersionPhasedReleases/phased-1"
+    );
+    expect(updatePhasedReleaseRequest?.body).toEqual({
       data: {
         type: "appStoreVersionPhasedReleases",
         id: "phased-1",
