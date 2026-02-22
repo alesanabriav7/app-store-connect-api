@@ -1,44 +1,61 @@
-export * from "./core/clock.js";
-export * from "./core/errors.js";
-export * from "./core/http-method.js";
-export * from "./core/process-runner.js";
-export * from "./domain/entities/app.js";
-export * from "./domain/repositories/apps-repository.js";
-export * from "./domain/repositories/app-metadata-repository.js";
-export * from "./domain/repositories/app-releases-repository.js";
-export * from "./domain/repositories/app-screenshots-repository.js";
-export * from "./domain/repositories/build-uploads-repository.js";
-export * from "./domain/services/app-store-connect-token-provider.js";
-export * from "./domain/services/ipa-artifact-provider.js";
-export * from "./domain/services/ipa-preflight-verifier.js";
-export * from "./domain/services/upload-operations-executor.js";
-export * from "./domain/use-cases/fetch-apps-use-case.js";
-export * from "./domain/use-cases/upload-ipa-build-use-case.js";
-export * from "./features/apps/apps-list-view-state.js";
-export * from "./features/apps/apps-list-view-model.js";
-export * from "./features/apps/create-apps-list-feature.js";
-export * from "./data/auth/app-store-connect-jwt-token-provider.js";
-export * from "./data/apps/apps-api-contract.js";
-export * from "./data/apps/apps-api-repository.js";
-export * from "./data/apps/apps-endpoints.js";
-export * from "./data/metadata/app-metadata-api-contract.js";
-export * from "./data/metadata/app-metadata-api-repository.js";
-export * from "./data/metadata/app-metadata-endpoints.js";
-export * from "./data/builds/build-uploads-api-contract.js";
-export * from "./data/builds/build-uploads-api-repository.js";
-export * from "./data/builds/build-uploads-endpoints.js";
-export * from "./data/http/http-client.js";
-export * from "./data/http/fetch-http-client.js";
-export * from "./data/local/custom-command-ipa-artifact-provider.js";
-export * from "./data/local/default-ipa-artifact-provider.js";
-export * from "./data/local/http-upload-operations-executor.js";
-export * from "./data/local/node-process-runner.js";
-export * from "./data/local/prebuilt-ipa-artifact-provider.js";
-export * from "./data/local/strict-ipa-preflight-verifier.js";
-export * from "./data/local/xcodebuild-ipa-artifact-provider.js";
-export * from "./data/releases/app-releases-api-contract.js";
-export * from "./data/releases/app-releases-api-repository.js";
-export * from "./data/releases/app-releases-endpoints.js";
-export * from "./data/screenshots/app-screenshots-api-contract.js";
-export * from "./data/screenshots/app-screenshots-api-repository.js";
-export * from "./data/screenshots/app-screenshots-endpoints.js";
+// API client
+export {
+  AppStoreConnectClient,
+  DomainError,
+  InfrastructureError,
+  type AppStoreConnectAuthConfig,
+  type Clock,
+  type FetchLike,
+  type HttpMethod,
+  type HttpQueryValue,
+  type HttpRequest,
+  type HttpResponse
+} from "./api/client.js";
+
+// Upload operations
+export {
+  executeUploadOperations,
+  parseUploadOperations,
+  type UploadFetchLike,
+  type UploadHttpHeader,
+  type UploadOperation
+} from "./api/types.js";
+
+// Commands
+export { appsListCommand, listApps, type AppSummary } from "./commands/apps-list.js";
+export {
+  buildsUploadCommand,
+  uploadBuild,
+  type BuildsUploadInput,
+  type BuildsUploadResult
+} from "./commands/builds-upload.js";
+export { ipaGenerateCommand } from "./commands/ipa-generate.js";
+
+// IPA utilities
+export {
+  resolveIpaArtifact,
+  type CustomCommandIpaSource,
+  type IpaArtifact,
+  type IpaSource,
+  type PrebuiltIpaSource,
+  type ProcessRunner,
+  type XcodebuildIpaSource
+} from "./ipa/artifact.js";
+export {
+  verifyIpa,
+  type IpaPreflightReport,
+  type VerifyStrictIpaInput
+} from "./ipa/preflight.js";
+
+// CLI
+export {
+  parseCliCommand,
+  parseCliOptions,
+  resolveCliEnvironment,
+  runCli,
+  type AppsListCliCommand,
+  type BuildsUploadCliCommand,
+  type CliCommand,
+  type HelpCliCommand,
+  type IpaGenerateCliCommand
+} from "./cli.js";
