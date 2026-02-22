@@ -9,10 +9,20 @@
     "typecheck": "tsc --noEmit",
     "test:watch": "vitest",
     "verify": "pnpm typecheck && pnpm test && pnpm build && pnpm cli -- --help",
+    "prepare": "tsc -p tsconfig.build.json",
     "cli": "node dist/cli.js",
     "cli:dev": "npx tsx src/cli.ts"
   },
-  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "app-store-connect",
+    "apple",
+    "ios",
+    "ipa",
+    "cli"
+  ],
   "author": "Alejandro Sanabria <alesanabriav@gmail.com>",
   "license": "MIT",
   "type": "module",

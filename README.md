@@ -22,7 +22,7 @@ app-store-connect-api --help
 ```bash
 git clone https://github.com/alesanabriav7/app-store-connect-api.git
 cd app-store-connect-api
-pnpm install && pnpm build
+pnpm install
 npm link
 app-store-connect-api --help
 ```
