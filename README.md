@@ -10,12 +10,10 @@ Current:
 - List all apps in your account from CLI.
 - Generate IPA artifacts from local projects (`xcodebuild` or custom command).
 - Upload IPA builds with strict local preflight verification.
+- Upload and manage screenshots per locale/device via reusable data/domain modules.
+- Manage localized app metadata (`name`, `subtitle`, `description`, `keywords`) via reusable modules.
+- Manage app versions, phased release state transitions, and submission flows via reusable modules.
 - Reuse the TypeScript modules in your own automation scripts.
-
-Planned:
-- Upload and manage screenshots per locale/device.
-- Manage app metadata (name, subtitle, description, keywords).
-- Manage versions, phased release steps, and submission flows.
 
 ## Requirements
 
