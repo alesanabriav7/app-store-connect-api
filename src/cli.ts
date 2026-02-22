@@ -312,16 +312,6 @@ function requireFlag(flags: ParsedFlags, name: string): string {
 // CLI options
 // ---------------------------------------------------------------------------
 
-interface CliOptions {
-  readonly help: boolean;
-}
-
-export function parseCliOptions(argv: readonly string[]): CliOptions {
-  return {
-    help: argv.includes("--help") || argv.includes("-h")
-  };
-}
-
 // ---------------------------------------------------------------------------
 // Help
 // ---------------------------------------------------------------------------

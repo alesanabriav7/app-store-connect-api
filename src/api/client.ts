@@ -158,7 +158,7 @@ export class AppStoreConnectClient {
     const response = await this.fetchLike(url, requestInit);
 
     if (!response.ok) {
-      const errorBody = await this.safeReadText(response);
+      const errorBody = await safeReadText(response);
       throw new InfrastructureError(
         `App Store Connect request failed (${response.status}): ${errorBody || response.statusText}`
       );
@@ -285,14 +285,6 @@ export class AppStoreConnectClient {
     return url;
   }
 
-  private async safeReadText(response: Response): Promise<string> {
-    try {
-      return await response.text();
-    } catch {
-      return "";
-    }
-  }
-
   private assertValidConfig(config: AppStoreConnectAuthConfig): void {
     if (!config.issuerId.trim()) {
       throw new InfrastructureError("issuerId is required.");
@@ -313,5 +305,13 @@ export class AppStoreConnectClient {
         `tokenTtlSeconds must be between 1 and ${MAX_TOKEN_TTL_SECONDS}.`
       );
     }
+  }
+}
+
+export async function safeReadText(response: Response): Promise<string> {
+  try {
+    return await response.text();
+  } catch {
+    return "";
   }
 }

@@ -50,7 +50,6 @@ export {
 // CLI
 export {
   parseCliCommand,
-  parseCliOptions,
   resolveCliEnvironment,
   runCli,
   type AppsListCliCommand,

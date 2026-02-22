@@ -1,6 +1,6 @@
 import { open } from "node:fs/promises";
 
-import { InfrastructureError } from "./client.js";
+import { InfrastructureError, safeReadText } from "./client.js";
 
 // ---------------------------------------------------------------------------
 // Upload operation types (shared by builds-upload and screenshots commands)
@@ -150,12 +150,4 @@ async function readFileChunk(
   }
 
   return buffer;
-}
-
-async function safeReadText(response: Response): Promise<string> {
-  try {
-    return await response.text();
-  } catch {
-    return "";
-  }
 }

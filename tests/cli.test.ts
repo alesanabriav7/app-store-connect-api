@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { InfrastructureError } from "../src/api/client.js";
 import {
   parseCliCommand,
-  parseCliOptions,
   resolveCliEnvironment
 } from "../src/cli.js";
 
@@ -131,13 +130,5 @@ describe("parseCliCommand", () => {
         outputIpaPath: "./dist/Demo.ipa"
       }
     });
-  });
-});
-
-describe("parseCliOptions", () => {
-  it("detects help flags", () => {
-    expect(parseCliOptions(["--help"]).help).toBe(true);
-    expect(parseCliOptions(["-h"]).help).toBe(true);
-    expect(parseCliOptions([]).help).toBe(false);
   });
 });
