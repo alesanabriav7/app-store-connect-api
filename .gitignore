@@ -4,3 +4,5 @@ coverage/
 .vitest/
 .DS_Store
 npm-debug.log*
+.env
+*.p8

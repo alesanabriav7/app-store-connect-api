@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { readFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 
 import { AppStoreConnectClient, InfrastructureError } from "./api/client.js";
@@ -21,9 +22,10 @@ interface CliEnvironment {
 
 const DEFAULT_BASE_URL = "https://api.appstoreconnect.apple.com/";
 
-export function resolveCliEnvironment(env: NodeJS.ProcessEnv): CliEnvironment {
+export async function resolveCliEnvironment(env: NodeJS.ProcessEnv): Promise<CliEnvironment> {
   const issuerId = env.ASC_ISSUER_ID?.trim();
   const keyId = env.ASC_KEY_ID?.trim();
+  const privateKeyPath = env.ASC_PRIVATE_KEY_PATH?.trim();
   const privateKeyRaw = env.ASC_PRIVATE_KEY?.trim();
   const baseUrl = env.ASC_BASE_URL?.trim() || DEFAULT_BASE_URL;
 
@@ -37,8 +39,8 @@ export function resolveCliEnvironment(env: NodeJS.ProcessEnv): CliEnvironment {
     missingKeys.push("ASC_KEY_ID");
   }
 
-  if (!privateKeyRaw) {
-    missingKeys.push("ASC_PRIVATE_KEY");
+  if (!privateKeyPath && !privateKeyRaw) {
+    missingKeys.push("ASC_PRIVATE_KEY or ASC_PRIVATE_KEY_PATH");
   }
 
   if (missingKeys.length > 0) {
@@ -47,12 +49,27 @@ export function resolveCliEnvironment(env: NodeJS.ProcessEnv): CliEnvironment {
     );
   }
 
+  const privateKey = privateKeyPath
+    ? await readPrivateKeyFile(privateKeyPath)
+    : normalizePrivateKey(privateKeyRaw!);
+
   return {
     issuerId: issuerId!,
     keyId: keyId!,
-    privateKey: normalizePrivateKey(privateKeyRaw!),
+    privateKey,
     baseUrl
   };
+}
+
+async function readPrivateKeyFile(filePath: string): Promise<string> {
+  try {
+    return (await readFile(filePath, "utf-8")).trim();
+  } catch (error) {
+    throw new InfrastructureError(
+      `Failed to read private key file at "${filePath}".`,
+      error
+    );
+  }
 }
 
 function normalizePrivateKey(rawValue: string): string {
@@ -374,7 +391,7 @@ async function handleCliCommand(
     return ipaGenerateCommand(command);
   }
 
-  const config = resolveCliEnvironment(env);
+  const config = await resolveCliEnvironment(env);
   const client = new AppStoreConnectClient({
     issuerId: config.issuerId,
     keyId: config.keyId,

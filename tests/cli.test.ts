@@ -1,4 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { InfrastructureError } from "../src/api/client.js";
 import {
@@ -7,8 +10,21 @@ import {
 } from "../src/cli.js";
 
 describe("resolveCliEnvironment", () => {
-  it("resolves required variables and normalizes escaped newlines", () => {
-    const env = resolveCliEnvironment({
+  let tempDir: string;
+  let keyFilePath: string;
+
+  beforeAll(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "asc-test-"));
+    keyFilePath = join(tempDir, "AuthKey_TEST.p8");
+    await writeFile(keyFilePath, "-----BEGIN PRIVATE KEY-----\ntest-key\n-----END PRIVATE KEY-----\n");
+  });
+
+  afterAll(async () => {
+    await rm(tempDir, { recursive: true });
+  });
+
+  it("resolves required variables and normalizes escaped newlines", async () => {
+    const env = await resolveCliEnvironment({
       ASC_ISSUER_ID: "issuer",
       ASC_KEY_ID: "key",
       ASC_PRIVATE_KEY: "line-1\\nline-2"
@@ -20,12 +36,43 @@ describe("resolveCliEnvironment", () => {
     expect(env.baseUrl).toBe("https://api.appstoreconnect.apple.com/");
   });
 
-  it("throws when required values are missing", () => {
-    expect(() =>
+  it("reads private key from file when ASC_PRIVATE_KEY_PATH is set", async () => {
+    const env = await resolveCliEnvironment({
+      ASC_ISSUER_ID: "issuer",
+      ASC_KEY_ID: "key",
+      ASC_PRIVATE_KEY_PATH: keyFilePath
+    });
+
+    expect(env.privateKey).toBe("-----BEGIN PRIVATE KEY-----\ntest-key\n-----END PRIVATE KEY-----");
+  });
+
+  it("prefers ASC_PRIVATE_KEY_PATH over ASC_PRIVATE_KEY", async () => {
+    const env = await resolveCliEnvironment({
+      ASC_ISSUER_ID: "issuer",
+      ASC_KEY_ID: "key",
+      ASC_PRIVATE_KEY_PATH: keyFilePath,
+      ASC_PRIVATE_KEY: "inline-key"
+    });
+
+    expect(env.privateKey).toBe("-----BEGIN PRIVATE KEY-----\ntest-key\n-----END PRIVATE KEY-----");
+  });
+
+  it("throws when the key file does not exist", async () => {
+    await expect(
+      resolveCliEnvironment({
+        ASC_ISSUER_ID: "issuer",
+        ASC_KEY_ID: "key",
+        ASC_PRIVATE_KEY_PATH: "/nonexistent/AuthKey.p8"
+      })
+    ).rejects.toThrow(InfrastructureError);
+  });
+
+  it("throws when required values are missing", async () => {
+    await expect(
       resolveCliEnvironment({
         ASC_ISSUER_ID: "issuer"
       })
-    ).toThrowError(InfrastructureError);
+    ).rejects.toThrow(InfrastructureError);
   });
 });
 
