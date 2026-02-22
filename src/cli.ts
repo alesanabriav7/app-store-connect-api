@@ -334,19 +334,18 @@ function requireFlag(flags: ParsedFlags, name: string): string {
 // ---------------------------------------------------------------------------
 
 function printHelp(): void {
-  console.log(`app-store-connect-api CLI
+  console.log(`appstore-tools CLI
 
 Usage:
-  pnpm cli -- --help
-  pnpm cli
-  pnpm cli -- apps list [--json]
-  pnpm cli -- ipa generate --output-ipa <path> [xcodebuild/custom options] [--json]
-  pnpm cli -- builds upload --app <appId|bundleId> --version <x.y.z> --build-number <n> (--ipa <path> | [generation options]) [--wait-processing] [--json] [--apply]
+  appstore-tools --help
+  appstore-tools apps list [--json]
+  appstore-tools ipa generate --output-ipa <path> [xcodebuild/custom options] [--json]
+  appstore-tools builds upload --app <appId|bundleId> --version <x.y.z> --build-number <n> (--ipa <path> | [generation options]) [--wait-processing] [--json] [--apply]
 
 Required environment variables:
   ASC_ISSUER_ID
   ASC_KEY_ID
-  ASC_PRIVATE_KEY
+  ASC_PRIVATE_KEY or ASC_PRIVATE_KEY_PATH
 
 Optional environment variables:
   ASC_BASE_URL (default: https://api.appstoreconnect.apple.com/)

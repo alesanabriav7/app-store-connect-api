@@ -1,5 +1,5 @@
 {
-  "name": "app-store-connect-api",
+  "name": "appstore-tools",
   "version": "1.0.0",
   "description": "TypeScript App Store Connect API client and CLI.",
   "main": "dist/index.js",
@@ -38,6 +38,6 @@
   },
   "packageManager": "pnpm@10.29.3",
   "bin": {
-    "app-store-connect-api": "dist/cli.js"
+    "appstore-tools": "dist/cli.js"
   }
 }

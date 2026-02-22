@@ -1,4 +1,4 @@
-# app-store-connect-api
+# appstore-tools
 
 TypeScript CLI and library for App Store Connect. Authenticate with JWT, list apps, generate IPAs, and upload builds — all from your terminal.
 
@@ -7,24 +7,24 @@ TypeScript CLI and library for App Store Connect. Authenticate with JWT, list ap
 ### From npm
 
 ```bash
-npx app-store-connect-api --help
+npx appstore-tools --help
 ```
 
 Or install globally:
 
 ```bash
-npm install -g app-store-connect-api
-app-store-connect-api --help
+npm install -g appstore-tools
+appstore-tools --help
 ```
 
 ### From source
 
 ```bash
-git clone https://github.com/alesanabriav7/app-store-connect-api.git
-cd app-store-connect-api
+git clone https://github.com/alesanabriav7/appstore-tools.git
+cd appstore-tools
 pnpm install
 npm link
-app-store-connect-api --help
+appstore-tools --help
 ```
 
 ## Setup
@@ -57,13 +57,13 @@ ASC_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
 ### List apps
 
 ```bash
-npx app-store-connect-api apps list
+npx appstore-tools apps list
 ```
 
 JSON output:
 
 ```bash
-npx app-store-connect-api apps list --json
+npx appstore-tools apps list --json
 ```
 
 ### Generate IPA
@@ -73,7 +73,7 @@ No credentials required.
 From xcodebuild:
 
 ```bash
-npx app-store-connect-api ipa generate \
+npx appstore-tools ipa generate \
   --output-ipa ./dist/MyApp.ipa \
   --scheme MyApp \
   --workspace-path ./MyApp.xcworkspace \
@@ -83,7 +83,7 @@ npx app-store-connect-api ipa generate \
 From a custom command:
 
 ```bash
-npx app-store-connect-api ipa generate \
+npx appstore-tools ipa generate \
   --output-ipa ./dist/MyApp.ipa \
   --build-command "make build-ipa" \
   --generated-ipa-path ./build/MyApp.ipa
@@ -94,7 +94,7 @@ npx app-store-connect-api ipa generate \
 Dry-run by default — verifies the IPA locally without uploading:
 
 ```bash
-npx app-store-connect-api builds upload \
+npx appstore-tools builds upload \
   --app com.example.myapp \
   --version 1.2.3 \
   --build-number 45 \
@@ -104,7 +104,7 @@ npx app-store-connect-api builds upload \
 Add `--apply` to upload, `--wait-processing` to poll until done:
 
 ```bash
-npx app-store-connect-api builds upload \
+npx appstore-tools builds upload \
   --app com.example.myapp \
   --version 1.2.3 \
   --build-number 45 \
@@ -115,7 +115,7 @@ npx app-store-connect-api builds upload \
 Build and upload in one step (xcodebuild mode):
 
 ```bash
-npx app-store-connect-api builds upload \
+npx appstore-tools builds upload \
   --app com.example.myapp \
   --version 1.2.3 \
   --build-number 45 \
@@ -138,13 +138,13 @@ Every upload runs these checks before touching App Store Connect:
 ### Help
 
 ```bash
-npx app-store-connect-api --help
+npx appstore-tools --help
 ```
 
 ## Library usage
 
 ```typescript
-import { AppStoreConnectClient, listApps } from "app-store-connect-api";
+import { AppStoreConnectClient, listApps } from "appstore-tools";
 
 const client = new AppStoreConnectClient({
   issuerId: process.env.ASC_ISSUER_ID!,
